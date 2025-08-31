@@ -51,6 +51,9 @@ def db_table_details(db_name: str, username: str, password: str, db_host: str, d
                         log_writer(file_name = 'DB-Table-Details', steps = '04', status = 'SUCCESS', message = 'Table "incident_data" Has No Data, Droping Table')
                         # drop table
                         database_cursor.execute('DROP TABLE incident_data')
+                    else:
+                        log_writer(file_name = 'DB-Table-Details', steps = '04', status = 'SUCCESS', message = 'Table "incident_data" Already Present')
+                        return {'status' : 'SUCCESS', 'message' : '"incident_data" Table Already Present'}
     except Exception as error:
         log_writer(file_name = 'DB-Table-Details', steps = '04', status = 'ERROR', message = str(error))
         return {'status' : 'ERROR', 'message' : f'[DB-Table-Details:S04] - {str(error)}'}
