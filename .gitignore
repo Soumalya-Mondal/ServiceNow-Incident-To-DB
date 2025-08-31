@@ -11,3 +11,6 @@ wheels/
 
 # Environment vrialble
 .env
+
+# Log file
+*.log
