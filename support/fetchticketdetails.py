@@ -63,9 +63,9 @@ def fetch_ticket_details(snow_url: str, username: str, password: str, fetch_offs
                         ticket_item.get('sys_id', {}).get('display_value'), #sys_id
                         ticket_item.get('number', {}).get('display_value'), #number
                         ticket_item.get('sys_created_by', {}).get('display_value'), #created_by
-                        parse_snow_datetime(str(ticket_item.get('sys_created_on', {}).get('value'))), #created_on
+                        parse_snow_datetime(ticket_item.get('sys_created_on', {}).get('value')), #created_on
                         ticket_item.get('opened_by', {}).get('display_value'), #opend_by
-                        parse_snow_datetime(str(ticket_item.get('opened_at', {}).get('value'))), #opened_at
+                        parse_snow_datetime(ticket_item.get('opened_at', {}).get('value')), #opened_at
                         ticket_item.get('cmdb_ci', {}).get('display_value'), #configuration_item
                         ticket_item.get('u_tenant_category', {}).get('display_value'), #category
                         ticket_item.get('u_tenant_subcategory', {}).get('display_value'), #subcategory
@@ -85,13 +85,14 @@ def fetch_ticket_details(snow_url: str, username: str, password: str, fetch_offs
                         ticket_item.get('short_description', {}).get('display_value'), #short_description
                         ticket_item.get('description', {}).get('display_value'), #description
                         ticket_item.get('resolved_by', {}).get('display_value'), #resolved_by
-                        parse_snow_datetime(str(ticket_item.get('resolved_at', {}).get('value'))), #resolved_at
+                        parse_snow_datetime(ticket_item.get('resolved_at', {}).get('value')), #resolved_at
                         ticket_item.get('close_code', {}).get('display_value'), #close_code
                         ticket_item.get('close_notes', {}).get('display_value'), #close_notes
                         ticket_item.get('work_notes', {}).get('display_value') #work_notes
                     )
-                    # append ticket into batch
-                    batch_ticket_records.append(ticket_record)
+                    # check if "sys_id" and "number" are non-empty
+                    if all([ticket_record[2] and ticket_record[2].strip(), ticket_record[3] and ticket_record[3].strip()]):
+                        batch_ticket_records.append(ticket_record)
                 return {'status' : 'SUCCESS', 'message' : 'Ticket Details Fetched', 'ticket_details' : batch_ticket_records}
             else:
                 return {'status' : 'INFO', 'message' : 'No More Ticket Details Found In ServiceNow', 'ticket_details' : []}
