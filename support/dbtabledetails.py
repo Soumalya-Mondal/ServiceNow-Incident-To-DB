@@ -1,5 +1,5 @@
 # define "db_table_details" function
-def db_table_details(db_name: str, username: str, password: str, db_host: str, db_port: str):
+def db_table_details(db_name: str, username: str, password: str, db_host: str, db_port: str) -> dict[str, str]:
     # importing python module:S01
     try:
         import psycopg2

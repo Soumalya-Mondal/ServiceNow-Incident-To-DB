@@ -23,6 +23,7 @@ if __name__ == '__main__':
     # importing user-define module:S03
     try:
         from support.totalticketcount import total_ticket_count
+        from support.dbtabledetails import db_table_details
     except Exception as error:
         print(f'ERROR - [S03] - {str(error)}')
 
@@ -45,25 +46,13 @@ if __name__ == '__main__':
     except Exception as error:
         print(f'ERROR - [S04] - {str(error)}')
 
-    # define db connection parameter:S05
-    try:
-        database_connection_parameter = {
-            "dbname" : str(pg_database),
-            "user" : str(pg_username),
-            "password" : str(pg_password),
-            "host" : str(pg_host),
-            "port" : str(pg_port)
-        }
-    except Exception as error:
-        print(f'ERROR - [S05] - {str(error)}')
-
     # fetching total incident ticket count:S06
     try:
         ticket_count_backend_response = total_ticket_count(snow_url = str(snow_api_url_for_stats), username = str(snow_username), password = str(snow_password), ticket_type = 'incident')
         # check the result
         if ((str(ticket_count_backend_response['status']).lower()) == 'success'):
             incident_ticket_count = ticket_count_backend_response['ticket_count']
-            print(incident_ticket_count)
+            print(f'INFO - Total: "{incident_ticket_count}" Ticket Present In ServiceNow')
         elif ((str(ticket_count_backend_response['status']).lower()) == 'error'):
             print(f"ERROR - {ticket_count_backend_response['message']}")
             sys.exit(1)
@@ -72,3 +61,19 @@ if __name__ == '__main__':
             sys.exit(1)
     except Exception as error:
         print(f'ERROR - [S06] - {str(error)}')
+
+    # checking "incident_data" table details:S07
+    try:
+        db_table_details_backend_response = db_table_details(db_name = str(pg_database), username = str(pg_username), password = str(pg_password), db_host = str(pg_host), db_port = str(pg_port))
+        # check the result
+        if ((str(db_table_details_backend_response['status']).lower()) == 'success'):
+            print(f"SUCCESS - {db_table_details_backend_response['message']}")
+        elif ((str(db_table_details_backend_response['status']).lower()) == 'info'):
+            print(f"INFO - {db_table_details_backend_response['message']}")
+        elif ((str(db_table_details_backend_response['status']).lower()) == 'error'):
+            print(f"ERROR - {db_table_details_backend_response['message']}")
+        else:
+            print('ERROR - Database Details Not Fetched')
+            sys.exit(1)
+    except Exception as error:
+        print(f'ERROR - [S07] - {str(error)}')

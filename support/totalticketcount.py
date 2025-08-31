@@ -1,5 +1,5 @@
 # define "total_ticket_count" function
-def total_ticket_count(snow_url: str, username: str, password: str, ticket_type: str):
+def total_ticket_count(snow_url: str, username: str, password: str, ticket_type: str) -> dict[str, str]:
     # importing python module:S01
     try:
         import urllib3
