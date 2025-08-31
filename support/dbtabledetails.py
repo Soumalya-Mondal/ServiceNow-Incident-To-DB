@@ -4,7 +4,7 @@ def db_table_details(db_name: str, username: str, password: str, db_host: str, d
     try:
         import psycopg2
     except Exception as error:
-        return {'status' : 'ERROR', 'message' : f'[DB-Table-Create:S01] - {str(error)}'}
+        return {'status' : 'ERROR', 'message' : f'[DB-Table-Details:S01] - {str(error)}'}
 
     # define db connection parameter:S02
     try:
@@ -16,7 +16,7 @@ def db_table_details(db_name: str, username: str, password: str, db_host: str, d
             "port" : str(db_port)
         }
     except Exception as error:
-        return {'status' : 'ERROR', 'message' : f'[DB-Table-Create:S02] - {str(error)}'}
+        return {'status' : 'ERROR', 'message' : f'[DB-Table-Details:S02] - {str(error)}'}
 
     # check if "incident_data" table present and fetch row count:S03
     try:
@@ -41,7 +41,7 @@ def db_table_details(db_name: str, username: str, password: str, db_host: str, d
                     else:
                         return {'status' : 'INFO', 'message' : f'"incident_data" Table Already Present; {records_count} Rows Present'}
     except Exception as error:
-        return {'status' : 'ERROR', 'message' : f'[DB-Table-Create:S03] - {str(error)}'}
+        return {'status' : 'ERROR', 'message' : f'[DB-Table-Details:S03] - {str(error)}'}
 
     # define "incident_data" table create SQL:S04
     try:
@@ -82,7 +82,7 @@ def db_table_details(db_name: str, username: str, password: str, db_host: str, d
         );
         ALTER TABLE incident_data OWNER TO soumalya;'''
     except Exception as error:
-        return {'status' : 'ERROR', 'message' : f'[DB-Table-Create:S04] - {str(error)}'}
+        return {'status' : 'ERROR', 'message' : f'[DB-Table-Details:S04] - {str(error)}'}
 
     # create "incident_data" table:S05
     try:
@@ -90,7 +90,7 @@ def db_table_details(db_name: str, username: str, password: str, db_host: str, d
             with database_connection.cursor() as database_cursor:
                 database_cursor.execute(incident_data_table_create_sql)
     except Exception as error:
-        return {'status' : 'ERROR', 'message' : f'[DB-Table-Create:S05] - {str(error)}'}
+        return {'status' : 'ERROR', 'message' : f'[DB-Table-Details:S05] - {str(error)}'}
 
     # check if "incident_data" table create:S06
     try:
@@ -109,4 +109,4 @@ def db_table_details(db_name: str, username: str, password: str, db_host: str, d
                 else:
                     return {'status' : 'ERROR', 'message' : '"incident_data" Table Not Created'}
     except Exception as error:
-        return {'status' : 'ERROR', 'message' : f'[DB-Table-Create:S06] - {str(error)}'}
+        return {'status' : 'ERROR', 'message' : f'[DB-Table-Details:S06] - {str(error)}'}
