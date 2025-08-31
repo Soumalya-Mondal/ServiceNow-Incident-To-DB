@@ -5,7 +5,7 @@ def total_ticket_count(snow_url: str, username: str, password: str, ticket_type:
         import urllib3
         import requests
     except Exception as error:
-        return {'status' : 'ERROR', 'message' : f'[Fetch-Total-Ticket-Count:S01] - {str(error)}', 'ticket_count' : '0'}
+        return {'status' : 'ERROR', 'message' : f'[Total-Ticket-Count:S01] - {str(error)}', 'ticket_count' : '0'}
 
     # define ServiceNow parameter:S02
     try:
@@ -20,7 +20,7 @@ def total_ticket_count(snow_url: str, username: str, password: str, ticket_type:
         }
         snow_api_url = f'{snow_url}/api/now/stats/{ticket_type.lower()}'
     except Exception as error:
-        return {'status' : 'ERROR', 'message' : f'[Fetch-Total-Ticket-Count:S02] - {str(error)}', 'ticket_count' : '0'}
+        return {'status' : 'ERROR', 'message' : f'[Total-Ticket-Count:S02] - {str(error)}', 'ticket_count' : '0'}
 
     # calling ServiceNow API:S03
     try:
@@ -32,4 +32,4 @@ def total_ticket_count(snow_url: str, username: str, password: str, ticket_type:
         else:
             return {'status' : 'ERROR', 'message' : str(ticket_count_response.text), 'ticket_count' : '0'}
     except Exception as error:
-        return {'status' : 'ERROR', 'message' : f'[Fetch-Total-Ticket-Count:S03] - {str(error)}'}
+        return {'status' : 'ERROR', 'message' : f'[Total-Ticket-Count:S03] - {str(error)}'}
