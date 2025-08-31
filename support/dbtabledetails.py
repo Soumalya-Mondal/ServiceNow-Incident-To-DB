@@ -13,7 +13,7 @@ def db_table_details(db_name: str, username: str, password: str, db_host: str, d
         sys.path.append(str(Path.cwd()))
         from support.logwriter import log_writer
     except Exception as error:
-        return {'status' : 'ERROR', 'message' : f'[DB-Table-Details:S02] - {str(error)}', 'ticket_count' : '0'}
+        return {'status' : 'ERROR', 'message' : f'[DB-Table-Details:S02] - {str(error)}'}
 
     # define db connection parameter:S03
     try:
