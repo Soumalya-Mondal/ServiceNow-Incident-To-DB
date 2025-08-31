@@ -2,15 +2,26 @@
 def fetch_ticket_details(snow_url: str, username: str, password: str, fetch_offset: int):
     # importing python module:S01
     try:
+        from pathlib import Path
+        import sys
         import urllib3
         import requests
         from datetime import datetime, timezone
     except Exception as error:
         return {'status' : 'ERROR', 'message' : f'[Fetch-Ticket-Details:S01] - {str(error)}', 'ticket_details' : []}
 
-    # define ServiceNow parameter:S02
+    # importing "log_writer" function:S02
+    try:
+        sys.path.append(str(Path.cwd()))
+        from support.logwriter import log_writer
+    except Exception as error:
+        return {'status' : 'ERROR', 'message' : f'[Fetch-Ticket-Details:S02] - {str(error)}', 'ticket_details' : []}
+
+    # define ServiceNow parameter:S03
     try:
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        # define empty "batch_ticket_records" list
+        batch_ticket_records = []
         snow_credential = (username, password)
         snow_headers = {
             'Accept': 'Application/json',
@@ -25,11 +36,12 @@ def fetch_ticket_details(snow_url: str, username: str, password: str, fetch_offs
             'sysparm_offset' : str(fetch_offset)
         }
         snow_api_url = f'{snow_url}/api/now/table/incident'
-        batch_ticket_records = []
+        log_writer(file_name = 'Fetch-Ticket-Details', steps = '03', status = 'SUCCESS', message = 'ServiceNow Parameter Defined')
     except Exception as error:
-        return {'status' : 'ERROR', 'message' : f'[Fetch-Ticket-Details:S02] - {str(error)}', 'ticket_details' : []}
-    
-    # define "parse_snow_datetime" function:S03
+        log_writer(file_name = 'Fetch-Ticket-Details', steps = '03', status = 'ERROR', message = str(error))
+        return {'status' : 'ERROR', 'message' : f'[Fetch-Ticket-Details:S03] - {str(error)}', 'ticket_details' : []}
+
+    # define "parse_snow_datetime" function:S04
     def parse_snow_datetime(value):
         EPOCH_UTC = datetime(1970, 1, 1, tzinfo = timezone.utc)
         s = (value or '').strip()
@@ -47,7 +59,7 @@ def fetch_ticket_details(snow_url: str, username: str, password: str, fetch_offs
         except ValueError:
             return EPOCH_UTC
 
-    # calling ServiceNow API:S03
+    # calling ServiceNow API:S05
     try:
         incident_ticket_data_response = requests.get(snow_api_url, auth = snow_credential, headers = snow_headers, params = snow_params, verify = False)
         # check the response status code
@@ -93,10 +105,14 @@ def fetch_ticket_details(snow_url: str, username: str, password: str, fetch_offs
                     # check if "sys_id" and "number" are non-empty
                     if all([ticket_record[2] and ticket_record[2].strip(), ticket_record[3] and ticket_record[3].strip()]):
                         batch_ticket_records.append(ticket_record)
+                log_writer(file_name = 'Fetch-Ticket-Details', steps = '05', status = 'SUCCESS', message = f'Total: {len(batch_ticket_records)} Incident Ticket Details Fetched')
                 return {'status' : 'SUCCESS', 'message' : 'Ticket Details Fetched', 'ticket_details' : batch_ticket_records}
             else:
+                log_writer(file_name = 'Fetch-Ticket-Details', steps = '05', status = 'INFO', message = 'No New Incident Ticket Found In ServiceNow')
                 return {'status' : 'INFO', 'message' : 'No More Ticket Details Found In ServiceNow', 'ticket_details' : []}
         else:
+            log_writer(file_name = 'Fetch-Ticket-Details', steps = '05', status = 'ERROR', message = str(incident_ticket_data_response.text))
             return {'status' : 'ERROR', 'message' : str(incident_ticket_data_response.text), 'ticket_details' : []}
     except Exception as error:
-        return {'status' : 'ERROR', 'message' : f'[Fetch-Ticket-Details:S03] - {str(error)}', 'ticket_details' : []}
+        log_writer(file_name = 'Fetch-Ticket-Details', steps = '05', status = 'ERROR', message = str(error))
+        return {'status' : 'ERROR', 'message' : f'[Fetch-Ticket-Details:S05] - {str(error)}', 'ticket_details' : []}
