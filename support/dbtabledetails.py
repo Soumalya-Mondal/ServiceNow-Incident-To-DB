@@ -78,7 +78,9 @@ def db_table_details(db_name: str, username: str, password: str, db_host: str, d
             resolved_at TIMESTAMPTZ,
             close_code TEXT,
             close_notes TEXT,
-            work_notes TEXT
+            work_notes TEXT,
+            CONSTRAINT sys_id_not_blank CHECK (btrim(sys_id) <> ''),
+            CONSTRAINT number_not_blank CHECK (btrim(number) <> '')
         );
         ALTER TABLE incident_data OWNER TO soumalya;'''
     except Exception as error:
