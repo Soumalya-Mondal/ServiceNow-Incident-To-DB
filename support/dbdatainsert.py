@@ -2,12 +2,21 @@
 def db_data_insert(db_name: str, username: str, password: str, db_host: str, db_port: str, batch_ticket_data: list):
     # importing python module:S01
     try:
+        from pathlib import Path
+        import sys
         import psycopg2
         from psycopg2.extras import execute_values
     except Exception as error:
         return {'status' : 'ERROR', 'message' : f'[DB-Data-Insert:S01] - {str(error)}', 'row_count' : 0}
 
-    # define db connection parameter:S02
+    # importing "log_writer" function:S02
+    try:
+        sys.path.append(str(Path.cwd()))
+        from support.logwriter import log_writer
+    except Exception as error:
+        return {'status' : 'ERROR', 'message' : f'[DB-Data-Insert:S02] - {str(error)}', 'row_count' : 0}
+
+    # define db connection parameter:S03
     try:
         db_connection_parameter = {
             "dbname" : str(db_name),
@@ -16,10 +25,12 @@ def db_data_insert(db_name: str, username: str, password: str, db_host: str, db_
             "host" : str(db_host),
             "port" : str(db_port)
         }
+        log_writer(file_name = 'DB-Data-Insert', steps = '03', status = 'SUCCESS', message = 'Database Connection Parameter Defined')
     except Exception as error:
-        return {'status' : 'ERROR', 'message' : f'[DB-Data-Insert:S02] - {str(error)}', 'row_count' : 0}
+        log_writer(file_name = 'DB-Data-Insert', steps = '03', status = 'ERROR', message = str(error))
+        return {'status' : 'ERROR', 'message' : f'[DB-Data-Insert:S03] - {str(error)}', 'row_count' : 0}
 
-    # check if "incident_data" table present:S03
+    # check if "incident_data" table present:S04
     try:
         with psycopg2.connect(**db_connection_parameter) as database_connection:  # type: ignore
             with database_connection.cursor() as database_cursor:
@@ -32,11 +43,13 @@ def db_data_insert(db_name: str, username: str, password: str, db_host: str, db_
                 table_exists = database_cursor.fetchone()[0]
                 # check if "incident_data" table present
                 if (not table_exists):
+                    log_writer(file_name = 'DB-Data-Insert', steps = '04', status = 'ERROR', message = 'Table "incident_data" Not Present')
                     return {'status' : 'ERROR', 'message' : '"incident_data" Table Not Present', 'row_count' : 0}
     except Exception as error:
-        return {'status' : 'ERROR', 'message' : f'[DB-Data-Insert:S03] - {str(error)}', 'row_count' : 0}
+        log_writer(file_name = 'DB-Data-Insert', steps = '04', status = 'ERROR', message = str(error))
+        return {'status' : 'ERROR', 'message' : f'[DB-Data-Insert:S04] - {str(error)}', 'row_count' : 0}
 
-    # define data upsert SQL query:S04
+    # define data upsert SQL query:S05
     try:
         ticket_data_upsert_sql = '''
         WITH v (
@@ -94,17 +107,23 @@ def db_data_insert(db_name: str, username: str, password: str, db_host: str, db_
             close_code = EXCLUDED.close_code,
             close_notes = EXCLUDED.close_notes,
             work_notes = EXCLUDED.work_notes;'''
+        log_writer(file_name = 'DB-Data-Insert', steps = '05', status = 'SUCCESS', message = 'Data Upsert SQL Query Defined')
     except Exception as error:
-        return {'status' : 'ERROR', 'message' : f'[DB-Data-Insert:S04] - {str(error)}', 'row_count' : 0}
+        log_writer(file_name = 'DB-Data-Insert', steps = '05', status = 'ERROR', message = str(error))
+        return {'status' : 'ERROR', 'message' : f'[DB-Data-Insert:S05] - {str(error)}', 'row_count' : 0}
 
-    # insert batch ticket data into table:S04
+    # insert batch ticket data into table:S06
     try:
         with psycopg2.connect(**db_connection_parameter) as database_connection:  # type: ignore
             with database_connection.cursor() as database_cursor:
                 execute_values(database_cursor, ticket_data_upsert_sql, batch_ticket_data)
                 database_cursor.execute('SELECT COUNT(*) FROM incident_data;')
-                return {'status' : 'SUCCESS', 'message' : 'Ticket Data Inserted', 'row_count' : int(database_cursor.fetchone()[0])}
+                inserted_ticket_count = int(database_cursor.fetchone()[0])
+                log_writer(file_name = 'DB-Data-Insert', steps = '06', status = 'SUCCESS', message = f'Total {int(inserted_ticket_count)} Incident Ticket Details Upserted')
+                return {'status' : 'SUCCESS', 'message' : 'Ticket Data Upserted', 'row_count' : int(inserted_ticket_count)}
     except psycopg2.Error as db_error:
-        return {'status' : 'ERROR', 'message' : f'[DB-Data-Insert:S04] - {str(db_error)}', 'row_count' : 0}
+        log_writer(file_name = 'DB-Data-Insert', steps = '06', status = 'ERROR', message = str(db_error))
+        return {'status' : 'ERROR', 'message' : f'[DB-Data-Insert:S06] - {str(db_error)}', 'row_count' : 0}
     except Exception as error:
-        return {'status' : 'ERROR', 'message' : f'[DB-Data-Insert:S04] - {str(error)}', 'row_count' : 0}
+        log_writer(file_name = 'DB-Data-Insert', steps = '06', status = 'ERROR', message = str(error))
+        return {'status' : 'ERROR', 'message' : f'[DB-Data-Insert:S06] - {str(error)}', 'row_count' : 0}
