@@ -63,6 +63,12 @@ def fetch_ticket_details(snow_url: str, username: str, password: str, fetch_offs
     def get_display_value(item, field):
         return item.get(field, {}).get("display_value") or "N/A"
 
+    # define "sanitize_value" function
+    def sanitize_value(value):
+        if isinstance(value, str):
+            return value.replace('\x00', '')  # remove NUL characters
+        return value
+
     # calling ServiceNow API:S05
     try:
         incident_ticket_data_response = requests.get(snow_api_url, auth = snow_credential, headers = snow_headers, params = snow_params, verify = False)
@@ -74,37 +80,37 @@ def fetch_ticket_details(snow_url: str, username: str, password: str, fetch_offs
                 # loop through all the ticket details
                 for ticket_item in incident_ticket_result:
                     ticket_record = (
-                        get_display_value(ticket_item, "sys_class_name"), # ticket_type
-                        get_display_value(ticket_item, "company"), # company
-                        get_display_value(ticket_item, "sys_id"), # sys_id
-                        get_display_value(ticket_item, "number"), # number
-                        get_display_value(ticket_item, "sys_created_by"), # created_by
-                        parse_snow_datetime(ticket_item.get('sys_created_on', {}).get('value')), #created_on
-                        get_display_value(ticket_item, "opened_by"), # opened_by
+                        sanitize_value(get_display_value(ticket_item, "sys_class_name")), # ticket_type
+                        sanitize_value(get_display_value(ticket_item, "company")), # company
+                        sanitize_value(get_display_value(ticket_item, "sys_id")), # sys_id
+                        sanitize_value(get_display_value(ticket_item, "number")), # number
+                        sanitize_value(get_display_value(ticket_item, "sys_created_by")), # created_by
+                        parse_snow_datetime(ticket_item.get('sys_created_on', {}).get('value')), #created_on (datetime)
+                        sanitize_value(get_display_value(ticket_item, "opened_by")), # opened_by
                         parse_snow_datetime(ticket_item.get('opened_at', {}).get('value')), #opened_at
-                        get_display_value(ticket_item, "cmdb_ci"), # configuration_item
-                        get_display_value(ticket_item, "u_tenant_category"), # category
-                        get_display_value(ticket_item, "u_tenant_subcategory"), # subcategory
-                        get_display_value(ticket_item, "priority"), # priority
-                        get_display_value(ticket_item, "impact"), # impact
-                        get_display_value(ticket_item, "urgency"), # urgency
-                        get_display_value(ticket_item, "severity"), # severity
-                        get_display_value(ticket_item, "state"), # state
-                        get_display_value(ticket_item, "incident_state"), # incident_state
-                        get_display_value(ticket_item, "assignment_group"), # assignment_group
-                        get_display_value(ticket_item, "assigned_to"), # assigned_to
-                        get_display_value(ticket_item, "parent_incident"), # parent_incident
-                        get_display_value(ticket_item, "u_business_process"), # business_process
-                        get_display_value(ticket_item, "u_vendor"), # vendor
-                        get_display_value(ticket_item, "u_environment"), # environment
-                        get_display_value(ticket_item, "u_availability_group"), # availability_group
-                        get_display_value(ticket_item, "short_description"), # short_description
-                        get_display_value(ticket_item, "description"), # description
-                        get_display_value(ticket_item, "resolved_by"), # resolved_by
-                        parse_snow_datetime(ticket_item.get('resolved_at', {}).get('value')), #resolved_at
-                        get_display_value(ticket_item, "close_code"), # close_code
-                        get_display_value(ticket_item, "close_notes"), # close_notes
-                        get_display_value(ticket_item, "work_notes") # work_notes
+                        sanitize_value(get_display_value(ticket_item, "cmdb_ci")), # configuration_item
+                        sanitize_value(get_display_value(ticket_item, "u_tenant_category")), # category
+                        sanitize_value(get_display_value(ticket_item, "u_tenant_subcategory")), # subcategory
+                        sanitize_value(get_display_value(ticket_item, "priority")), # priority
+                        sanitize_value(get_display_value(ticket_item, "impact")), # impact
+                        sanitize_value(get_display_value(ticket_item, "urgency")), # urgency
+                        sanitize_value(get_display_value(ticket_item, "severity")), # severity
+                        sanitize_value(get_display_value(ticket_item, "state")), # state
+                        sanitize_value(get_display_value(ticket_item, "incident_state")), # incident_state
+                        sanitize_value(get_display_value(ticket_item, "assignment_group")), # assignment_group
+                        sanitize_value(get_display_value(ticket_item, "assigned_to")), # assigned_to
+                        sanitize_value(get_display_value(ticket_item, "parent_incident")), # parent_incident
+                        sanitize_value(get_display_value(ticket_item, "u_business_process")), # business_process
+                        sanitize_value(get_display_value(ticket_item, "u_vendor")), # vendor
+                        sanitize_value(get_display_value(ticket_item, "u_environment")), # environment
+                        sanitize_value(get_display_value(ticket_item, "u_availability_group")), # availability_group
+                        sanitize_value(get_display_value(ticket_item, "short_description")), # short_description
+                        sanitize_value(get_display_value(ticket_item, "description")), # description
+                        sanitize_value(get_display_value(ticket_item, "resolved_by")), # resolved_by
+                        parse_snow_datetime(ticket_item.get('resolved_at', {}).get('value')), #resolved_at (datetime)
+                        sanitize_value(get_display_value(ticket_item, "close_code")), # close_code
+                        sanitize_value(get_display_value(ticket_item, "close_notes")), # close_notes
+                        sanitize_value(get_display_value(ticket_item, "work_notes")) # work_notes
                     )
                     # check if "sys_id" and "number" are non-empty
                     if all([ticket_record[2] and ticket_record[2].strip(), ticket_record[3] and ticket_record[3].strip()]):
