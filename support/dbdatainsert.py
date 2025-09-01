@@ -117,13 +117,22 @@ def db_data_insert(db_name: str, username: str, password: str, db_host: str, db_
         with psycopg2.connect(**db_connection_parameter) as database_connection:  # type: ignore
             with database_connection.cursor() as database_cursor:
                 execute_values(database_cursor, ticket_data_upsert_sql, batch_ticket_data)
-                database_cursor.execute('SELECT COUNT(*) FROM incident_data;')
-                inserted_ticket_count = int(database_cursor.fetchone()[0])
-                log_writer(file_name = 'DB-Data-Insert', steps = '06', status = 'SUCCESS', message = f'Total {int(inserted_ticket_count)} Incident Ticket Details Upserted')
-                return {'status' : 'SUCCESS', 'message' : 'Ticket Data Upserted', 'row_count' : int(inserted_ticket_count)}
     except psycopg2.Error as db_error:
         log_writer(file_name = 'DB-Data-Insert', steps = '06', status = 'ERROR', message = str(db_error))
         return {'status' : 'ERROR', 'message' : f'[DB-Data-Insert:S06] - {str(db_error)}', 'row_count' : 0}
     except Exception as error:
+        # ERROR - [DB-Data-Insert:S06] - A string literal cannot contain NUL (0x00) characters.
         log_writer(file_name = 'DB-Data-Insert', steps = '06', status = 'ERROR', message = str(error))
         return {'status' : 'ERROR', 'message' : f'[DB-Data-Insert:S06] - {str(error)}', 'row_count' : 0}
+
+    # fetch inserted row count:S07
+    try:
+        with psycopg2.connect(**db_connection_parameter) as database_connection:  # type: ignore
+            with database_connection.cursor() as database_cursor:
+                database_cursor.execute('SELECT COUNT(*) FROM incident_data;')
+                inserted_ticket_count = int(database_cursor.fetchone()[0])
+                log_writer(file_name = 'DB-Data-Insert', steps = '07', status = 'SUCCESS', message = f'Total {int(inserted_ticket_count)} Incident Ticket Details Upserted')
+                return {'status' : 'SUCCESS', 'message' : 'Ticket Data Upserted', 'row_count' : int(inserted_ticket_count)}
+    except Exception as error:
+        log_writer(file_name = 'DB-Data-Insert', steps = '07', status = 'ERROR', message = str(error))
+        return {'status' : 'ERROR', 'message' : f'[DB-Data-Insert:S07] - {str(error)}', 'row_count' : 0}
