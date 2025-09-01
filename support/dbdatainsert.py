@@ -121,7 +121,6 @@ def db_data_insert(db_name: str, username: str, password: str, db_host: str, db_
         log_writer(file_name = 'DB-Data-Insert', steps = '06', status = 'ERROR', message = str(db_error))
         return {'status' : 'ERROR', 'message' : f'[DB-Data-Insert:S06] - {str(db_error)}', 'row_count' : 0}
     except Exception as error:
-        # ERROR - [DB-Data-Insert:S06] - A string literal cannot contain NUL (0x00) characters.
         log_writer(file_name = 'DB-Data-Insert', steps = '06', status = 'ERROR', message = str(error))
         return {'status' : 'ERROR', 'message' : f'[DB-Data-Insert:S06] - {str(error)}', 'row_count' : 0}
 
