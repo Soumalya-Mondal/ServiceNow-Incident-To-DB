@@ -23,6 +23,6 @@ def log_writer(file_name: str, steps: str, status: str, message: str):
     # write message to log file:S04
     try:
         with open(activity_log_file_path, 'a') as log_file:
-            log_file.write(f'{str(log_date_time)} - {str(file_name).ljust(20)} - {str(steps)} - {str(status).ljust(6)} - {str(message)}\n')
+            log_file.write(f'{str(log_date_time)} - {str(file_name).ljust(20)} - {str(steps)} - {str(status).ljust(7)} - {str(message)}\n')
     except Exception as error:
         print(f'ERROR - [Log-Writer:S04] - {str(error)}')
