@@ -84,7 +84,6 @@ if __name__ == '__main__':
             if ((str(db_data_count_backend_response['status']).lower()) == 'success'):
                 if (int(db_data_count_backend_response['row_count']) > 10000):
                     batch_ticket_offset = int(int(db_data_count_backend_response['row_count']) / 10000) * 10000
-                    print(batch_ticket_offset)
                 else:
                     batch_ticket_offset = 10000
             elif ((str(db_data_count_backend_response['status']).lower()) == 'error'):
