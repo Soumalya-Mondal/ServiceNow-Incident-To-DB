@@ -59,6 +59,10 @@ def fetch_ticket_details(snow_url: str, username: str, password: str, fetch_offs
         except ValueError:
             return EPOCH_UTC
 
+    # define "get_display_value" function
+    def get_display_value(item, field):
+        return item.get(field, {}).get("display_value") or "N/A"
+
     # calling ServiceNow API:S05
     try:
         incident_ticket_data_response = requests.get(snow_api_url, auth = snow_credential, headers = snow_headers, params = snow_params, verify = False)
@@ -70,37 +74,37 @@ def fetch_ticket_details(snow_url: str, username: str, password: str, fetch_offs
                 # loop through all the ticket details
                 for ticket_item in incident_ticket_result:
                     ticket_record = (
-                        ticket_item.get('sys_class_name', {}).get('display_value'), #ticket_type
-                        ticket_item.get('company', {}).get('display_value'), #company
-                        ticket_item.get('sys_id', {}).get('display_value'), #sys_id
-                        ticket_item.get('number', {}).get('display_value'), #number
-                        ticket_item.get('sys_created_by', {}).get('display_value'), #created_by
+                        get_display_value(ticket_item, "sys_class_name"), # ticket_type
+                        get_display_value(ticket_item, "company"), # company
+                        get_display_value(ticket_item, "sys_id"), # sys_id
+                        get_display_value(ticket_item, "number"), # number
+                        get_display_value(ticket_item, "sys_created_by"), # created_by
                         parse_snow_datetime(ticket_item.get('sys_created_on', {}).get('value')), #created_on
-                        ticket_item.get('opened_by', {}).get('display_value'), #opend_by
+                        get_display_value(ticket_item, "opened_by"), # opened_by
                         parse_snow_datetime(ticket_item.get('opened_at', {}).get('value')), #opened_at
-                        ticket_item.get('cmdb_ci', {}).get('display_value'), #configuration_item
-                        ticket_item.get('u_tenant_category', {}).get('display_value'), #category
-                        ticket_item.get('u_tenant_subcategory', {}).get('display_value'), #subcategory
-                        ticket_item.get('priority', {}).get('display_value'), #priority
-                        ticket_item.get('impact', {}).get('display_value'), #impact
-                        ticket_item.get('urgency', {}).get('display_value'), #urgency
-                        ticket_item.get('severity', {}).get('display_value'), #severity
-                        ticket_item.get('state', {}).get('display_value'), #state
-                        ticket_item.get('incident_state', {}).get('display_value'), #incident_state
-                        ticket_item.get('assignment_group', {}).get('display_value'), #assignment_group
-                        ticket_item.get('assigned_to', {}).get('display_value'), #assigned_to
-                        ticket_item.get('parent_incident', {}).get('display_value'), #parent_incident
-                        ticket_item.get('u_business_process', {}).get('display_value'), #business_process
-                        ticket_item.get('u_vendor', {}).get('display_value'), #vendor
-                        ticket_item.get('u_environment', {}).get('display_value'), #environment
-                        ticket_item.get('u_availability_group', {}).get('display_value'), #availability_group
-                        ticket_item.get('short_description', {}).get('display_value'), #short_description
-                        ticket_item.get('description', {}).get('display_value'), #description
-                        ticket_item.get('resolved_by', {}).get('display_value'), #resolved_by
+                        get_display_value(ticket_item, "cmdb_ci"), # configuration_item
+                        get_display_value(ticket_item, "u_tenant_category"), # category
+                        get_display_value(ticket_item, "u_tenant_subcategory"), # subcategory
+                        get_display_value(ticket_item, "priority"), # priority
+                        get_display_value(ticket_item, "impact"), # impact
+                        get_display_value(ticket_item, "urgency"), # urgency
+                        get_display_value(ticket_item, "severity"), # severity
+                        get_display_value(ticket_item, "state"), # state
+                        get_display_value(ticket_item, "incident_state"), # incident_state
+                        get_display_value(ticket_item, "assignment_group"), # assignment_group
+                        get_display_value(ticket_item, "assigned_to"), # assigned_to
+                        get_display_value(ticket_item, "parent_incident"), # parent_incident
+                        get_display_value(ticket_item, "u_business_process"), # business_process
+                        get_display_value(ticket_item, "u_vendor"), # vendor
+                        get_display_value(ticket_item, "u_environment"), # environment
+                        get_display_value(ticket_item, "u_availability_group"), # availability_group
+                        get_display_value(ticket_item, "short_description"), # short_description
+                        get_display_value(ticket_item, "description"), # description
+                        get_display_value(ticket_item, "resolved_by"), # resolved_by
                         parse_snow_datetime(ticket_item.get('resolved_at', {}).get('value')), #resolved_at
-                        ticket_item.get('close_code', {}).get('display_value'), #close_code
-                        ticket_item.get('close_notes', {}).get('display_value'), #close_notes
-                        ticket_item.get('work_notes', {}).get('display_value') #work_notes
+                        get_display_value(ticket_item, "close_code"), # close_code
+                        get_display_value(ticket_item, "close_notes"), # close_notes
+                        get_display_value(ticket_item, "work_notes") # work_notes
                     )
                     # check if "sys_id" and "number" are non-empty
                     if all([ticket_record[2] and ticket_record[2].strip(), ticket_record[3] and ticket_record[3].strip()]):
