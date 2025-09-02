@@ -20,7 +20,6 @@ if __name__ == '__main__':
     # importing user-define module:S03
     try:
         from support.logwriter import log_writer
-        from support.totalticketcount import total_ticket_count
         from support.dbtabledetails import db_table_details
         from support.fetchticketdetails import fetch_ticket_details
         from support.dbdatacount import db_data_count
@@ -49,20 +48,7 @@ if __name__ == '__main__':
         log_writer(file_name = 'Main-Function', steps = '04', status = 'ERROR', message = str(error))
         print(f'ERROR - [S04] - {str(error)}')
 
-    # fetching total incident ticket count from ServiceNow:S05
-    try:
-        ticket_count_backend_response = total_ticket_count(snow_url = str(snow_endpoint), username = str(snow_username), password = str(snow_password), ticket_type = 'incident')
-        # check the result
-        if ((str(ticket_count_backend_response['status']).lower()) == 'success'):
-            incident_ticket_count = ticket_count_backend_response['ticket_count']
-        elif ((str(ticket_count_backend_response['status']).lower()) == 'error'):
-            print(f"{ticket_count_backend_response['status']} - {ticket_count_backend_response['message']}")
-            sys.exit(1)
-    except Exception as error:
-        log_writer(file_name = 'Main-Function', steps = '05', status = 'ERROR', message = str(error))
-        print(f'ERROR - [S05] - {str(error)}')
-
-    # checking "incident_data" table details:S06
+    # checking "incident_data" table details:S05
     try:
         db_table_details_backend_response = db_table_details(db_name = str(pg_database), username = str(pg_username), password = str(pg_password), db_host = str(pg_host), db_port = str(pg_port))
         # check the result
@@ -73,10 +59,10 @@ if __name__ == '__main__':
             print(f"ERROR - {db_table_details_backend_response['message']}")
             sys.exit(1)
     except Exception as error:
-        log_writer(file_name = 'Main-Function', steps = '06', status = 'ERROR', message = str(error))
-        print(f'ERROR - [S06] - {str(error)}')
+        log_writer(file_name = 'Main-Function', steps = '05', status = 'ERROR', message = str(error))
+        print(f'ERROR - [S05] - {str(error)}')
 
-    # fetching last inserted data from database:S07
+    # fetching last inserted data from database:S06
     try:
         if ((str(db_table_details_backend_response['status']).lower()) == 'success'):
             db_data_count_backend_response = db_data_count(db_name = str(pg_database), username = str(pg_username), password = str(pg_password), db_host = str(pg_host), db_port = str(pg_port))
@@ -89,14 +75,16 @@ if __name__ == '__main__':
             elif ((str(db_data_count_backend_response['status']).lower()) == 'error'):
                 print(f"ERROR - {db_data_count_backend_response['message']}")
     except Exception as error:
-        log_writer(file_name = 'Main-Function', steps = '07', status = 'ERROR', message = str(error))
-        print(f'ERROR - [S07] - {str(error)}')
+        log_writer(file_name = 'Main-Function', steps = '06', status = 'ERROR', message = str(error))
+        print(f'ERROR - [S06] - {str(error)}')
 
     # loop till ServiceNow stop sending data
     if ((str(db_data_count_backend_response['status']).lower()) == 'success'):
+        execution_count = 1
         while True:
+            print('~' * 20, f' {execution_count} ', '~' * 20)
             execution_start_time = time.time()
-            # fetching ticket details:S08
+            # fetching ticket details:S07
             try:
                 fetch_ticket_details_backend_response = fetch_ticket_details(snow_url = str(snow_endpoint), username = str(snow_username), password = str(snow_password), fetch_offset = int(batch_ticket_offset))
                 # check the result
@@ -108,23 +96,24 @@ if __name__ == '__main__':
                     sys.exit(1)
             except Exception as error:
                 log_writer(file_name = 'Main-Function', steps = '08', status = 'ERROR', message = str(error))
-                print(f'ERROR - [S08] - {str(error)}')
+                print(f'ERROR - [S07] - {str(error)}')
 
-            # insert data into database:S09
+            # insert data into database:S08
             try:
                 if ((str(fetch_ticket_details_backend_response['status']).lower()) == 'success'):
                     db_data_insert_backend_response = db_data_insert(db_name = str(pg_database), username = str(pg_username), password = str(pg_password), db_host = str(pg_host), db_port = str(pg_port), batch_ticket_data = fetch_ticket_details_backend_response['ticket_details'])
                     # check the result
                     if ((str(db_data_insert_backend_response['status']).lower()) == 'success'):
-                        print(f"✅ - Ticket Inserted: {int(db_data_insert_backend_response['row_count'])}/{int(incident_ticket_count)}")
+                        print(f"✅ - Ticket Inserted: {int(db_data_insert_backend_response['row_count'])}")
                     elif ((str(db_data_insert_backend_response['status']).lower()) == 'error'):
                         print(f"ERROR - {db_data_insert_backend_response['message']}")
                         sys.exit(1)
             except Exception as error:
                 log_writer(file_name = 'Main-Function', steps = '09', status = 'ERROR', message = str(error))
-                print(f'ERROR - [S09] - {str(error)}')
+                print(f'ERROR - [S08] - {str(error)}')
 
             # appending ticket offset value
             batch_ticket_offset += 10000
             # print execution time
             print(f'⌛ - Execution Time : {(time.time() - execution_start_time):.2f} Sec')
+            execution_count += 1
