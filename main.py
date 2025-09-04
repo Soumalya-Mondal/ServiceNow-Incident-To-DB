@@ -104,7 +104,7 @@ if __name__ == '__main__':
                     db_data_insert_backend_response = db_data_insert(db_name = str(pg_database), username = str(pg_username), password = str(pg_password), db_host = str(pg_host), db_port = str(pg_port), batch_ticket_data = fetch_ticket_details_backend_response['ticket_details'])
                     # check the result
                     if ((str(db_data_insert_backend_response['status']).lower()) == 'success'):
-                        print(f"✅ - Ticket Inserted: {int(db_data_insert_backend_response['row_count'])}")
+                        print(f"✅ - Ticket Inserted: {int(db_data_insert_backend_response['row_count']) * execution_count}")
                     elif ((str(db_data_insert_backend_response['status']).lower()) == 'error'):
                         print(f"ERROR - {db_data_insert_backend_response['message']}")
                         sys.exit(1)

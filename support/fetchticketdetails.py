@@ -150,7 +150,7 @@ def fetch_ticket_details(snow_url: str, username: str, password: str, fetch_offs
                         sanitize_value(get_display_value(ticket_item, "u_availability_group")),
                         sanitize_value(get_display_value(ticket_item, "u_approval")),
                         sanitize_value(get_display_value(ticket_item, "u_caukp_ebonding_cmo_id")),
-                        int(sanitize_value(get_display_value(ticket_item, "reassignment_count") or 0)),
+                        sanitize_value(get_display_value(ticket_item, "reassignment_count")),
                         sanitize_value(get_display_value(ticket_item, "u_ola_response_met")),
                         parse_snow_datetime(ticket_item.get("sla_due", {}).get("value")),
                         sanitize_value(get_display_value(ticket_item, "u_event_help_id")),

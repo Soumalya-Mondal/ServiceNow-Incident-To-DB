@@ -133,7 +133,7 @@ def db_table_details(db_name: str, username: str, password: str, db_host: str, d
             u_availability_group TEXT,
             u_approval TEXT,
             u_caukp_ebonding_cmo_id TEXT,
-            reassignment_count INTEGER,
+            reassignment_count TEXT,
             u_ola_response_met TEXT,
             sla_due TIMESTAMPTZ,
             u_event_help_id TEXT,
